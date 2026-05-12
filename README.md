@@ -22,30 +22,19 @@ uv build
 open http://localhost:8000
 ```
 
-Start with challenges/01-permissions-panic/README.md
+**Start with challenges/01-permissions-panic/README.md**
 
 Teams of 2-4 recommended. First team to finish all challenges wins.
 
+---
+
 Based on current attendance, here are the teams:
-Michal
-Stefan
-Alun
 
-Adela
-Tom
-Nona
+| Team 1  | Team 2| Team 3  | Team 4| Team 5  |
+| :-----: |:-----:| :------:|:-----:|:-------:|
+| Michal  | Adela | Lizzy   | Sally | Sergio  |
+| Stefan  | Tom   | Ledia   | John  | Simon   |
+| Alun    | Nona  | Soumaya | Ares  | Sekhar  |
 
-Lizzy 
-Ledia
-Soumaya
 
-Sally
-John
-Ares
-
-Sergio
-Simon
-Sekhar
-
-Facilitator
-Tash
+**Facilitator**: Tash

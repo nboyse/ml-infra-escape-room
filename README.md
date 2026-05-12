@@ -25,3 +25,27 @@ open http://localhost:8000
 Start with challenges/01-permissions-panic/README.md
 
 Teams of 2-4 recommended. First team to finish all challenges wins.
+
+Based on current attendance, here are the teams:
+Michal
+Stefan
+Alun
+
+Adela
+Tom
+Nona
+
+Lizzy 
+Ledia
+Soumaya
+
+Sally
+John
+Ares
+
+Sergio
+Simon
+Sekhar
+
+Facilitator
+Tash

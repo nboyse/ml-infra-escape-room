@@ -90,20 +90,38 @@ for sg in get_resources("aws_security_group"):
                     f"{sg['address']} allows public ingress on port {from_port}",
                 )
 
-for bucket in get_resources("aws_s3_bucket"):
-    encryption = bucket["values"].get(
-        "server_side_encryption_configuration"
-    )
+def has_encryption(bucket_address):
+    for b in get_resources("aws_s3_bucket"):
+        if b["address"] == bucket_address:
+            if b["values"].get("server_side_encryption_configuration"):
+                return True
+            break
 
-    if not encryption:
+    for enc in get_resources("aws_s3_bucket_server_side_encryption_configuration"):
+        if enc["address"].startswith(f"aws_s3_bucket_server_side_encryption_configuration.{bucket_address.split('.')[-1]}") or \
+           enc["values"].get("bucket") == bucket_address:
+            return True
+    return False
+
+
+for bucket in get_resources("aws_s3_bucket"):
+    if not has_encryption(bucket["address"]):
         result.fail(
             15,
             f"{bucket['address']} missing S3 encryption",
         )
     else:
-        result.pass_(
-            f"{bucket['address']} has encryption enabled"
-        )
+        result.pass_(f"{bucket['address']} has encryption enabled")
+
+
+for bucket in get_resources("aws_s3_bucket"):
+    name = bucket["values"].get("bucket", "")
+    if "model" in name.lower() or "models" in name.lower():
+        if not has_encryption(bucket["address"]):
+            result.fail(
+                20,
+                f"Model bucket {bucket['address']} lacks encryption"
+            )
 
 for bucket in get_resources("aws_s3_bucket"):
     acl = bucket["values"].get("acl")
@@ -132,20 +150,24 @@ for db in get_resources("aws_db_instance"):
         )
 
 for resource in resources:
-    values = json.dumps(resource["values"])
+    values_str = json.dumps(resource["values"]).lower()
+    address = resource["address"]
 
-    suspicious = [
-        "password",
-        "secret",
-        "AKIA",
-        "BEGIN PRIVATE KEY",
-    ]
+    suspicious = ["AKIA", "BEGIN PRIVATE KEY", "-----BEGIN"]
+
+    if resource["type"] == "aws_db_instance":
+        if "password" in resource["values"]:
+            result.warn(
+                5,
+                f"{address} has password (this is normal but consider using AWS Secrets Manager)"
+            )
+        continue
 
     for s in suspicious:
-        if s in values:
+        if s.lower() in values_str:
             result.warn(
                 10,
-                f"{resource['address']} may contain plaintext secrets",
+                f"{address} may contain plaintext secrets"
             )
             
 for db in get_resources("aws_db_instance"):
@@ -198,10 +220,20 @@ for instance in get_resources("aws_instance"):
         )
 
 
-for bucket in get_resources("aws_s3_bucket"):
-    lifecycle = bucket["values"].get("lifecycle_rule")
+def has_lifecycle_config(bucket_address):
+    for b in get_resources("aws_s3_bucket"):
+        if b["address"] == bucket_address and b["values"].get("lifecycle_rule"):
+            return True
+    
+    for lc in get_resources("aws_s3_bucket_lifecycle_configuration"):
+        if (lc["values"].get("bucket") == bucket_address or 
+            lc["address"].endswith("." + bucket_address.split(".")[-1])):
+            return True
+    return False
 
-    if not lifecycle:
+
+for bucket in get_resources("aws_s3_bucket"):
+    if not has_lifecycle_config(bucket["address"]):
         result.warn(
             5,
             f"{bucket['address']} missing lifecycle policy",
@@ -221,22 +253,17 @@ for lb in get_resources("aws_lb"):
             5,
             f"{lb['address']} missing access logs",
         )
-        
+
 config = plan.get("configuration", {})
+required_providers = config.get("provider_config", {}) or config.get("required_providers", {})
 
-terraform_config = json.dumps(config)
+if not config.get("required_version"):
+    result.warn(5, "Terraform version not pinned")
 
-if "required_version" not in terraform_config:
-    result.warn(
-        5,
-        "Terraform version not pinned",
-    )
-
-if "required_providers" not in terraform_config:
-    result.warn(
-        5,
-        "Provider versions not pinned",
-    )
+if not required_providers:
+    result.warn(5, "Provider versions not pinned")
+else:
+    result.pass_("Provider versions are configured")
     
 for resource in resources:
     tags = resource["values"].get("tags")
@@ -265,15 +292,20 @@ for instance in get_resources("aws_instance"):
         )
 
 
+def is_bucket_encrypted(bucket_address):
+    for enc in get_resources("aws_s3_bucket_server_side_encryption_configuration"):
+        enc_bucket = enc["values"].get("bucket")
+        if enc_bucket == bucket_address or enc["address"].endswith("." + bucket_address.split(".")[-1]):
+            return True
+    return False
+
+
 for bucket in get_resources("aws_s3_bucket"):
-    name = bucket["values"].get("bucket", "")
-
-    if "model" in name.lower():
-        encryption = bucket["values"].get(
-            "server_side_encryption_configuration"
-        )
-
-        if not encryption:
+    name = str(bucket["values"].get("bucket", "")).lower()
+    if "model" in name or "models" in name:
+        if is_bucket_encrypted(bucket["address"]):
+            result.pass_(f"Model bucket {bucket['address']} has encryption")
+        else:
             result.fail(
                 20,
                 f"Model bucket {bucket['address']} lacks encryption",

@@ -1,0 +1,18 @@
+[project]
+name = "ml-infra-escape-room"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.136.1",
+    "locust>=2.44.0",
+    "python-multipart>=0.0.28",
+    "requests>=2.34.0",
+    "uvicorn>=0.46.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "mock-infra/app",
+]

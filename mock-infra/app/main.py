@@ -17,6 +17,10 @@ KNOWLEDGE_BASE = {
     "rag": "High quality RAG requires good chunking, embedding model selection, metadata filtering, and re-ranking of retrieved chunks.",
 }
 
+@app.get("/")
+async def root():
+    return {"message": "Yep you're up and running and can start challenge 1"}
+
 @app.post("/invoke")
 def invoke_model(request: InvokeRequest):
     start = time.time()

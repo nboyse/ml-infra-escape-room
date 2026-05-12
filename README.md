@@ -9,14 +9,14 @@
 
 ```bash
 # 1. Clone & setup
-git clone <your-repo-url>
+git clone git@github.com:nboyse/ml-infra-escape-room.git
 cd ml-infra-escape-room
 
 # 2. Start services
 docker-compose up -d --build
 
 # 3. Install Locust
-pip install -r requirements.txt
+uv build
 
 # 4. Open browser
 open http://localhost:8000
@@ -25,5 +25,3 @@ open http://localhost:8000
 Start with challenges/01-permissions-panic/README.md
 
 Teams of 2-4 recommended. First team to finish all challenges wins.
-
-Made for the AI Infrastructure team workshop.

@@ -11,3 +11,5 @@ wheels/
 .terraform/
 *.tfstate*
 locust_stats/
+.terraform.lock.hcl
+*tfplan*

@@ -16,3 +16,5 @@ Fix the `costly_agent.py` script so it:
 - Bonus: Add visible cost estimation
 
 Run it with: `python costly_agent.py`
+
+**Test**: Run python check_solution.py (SCORE > 85 and PASS - next challenge)

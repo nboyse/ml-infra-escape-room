@@ -11,3 +11,5 @@ Right now it's slow and keeps failing under even moderate load.
 4. Test it with Locust (next challenge).
 
 **Success**: The script should return good answers consistently and handle multiple calls without crashing. Your best bet is to google common ML/DS practices :)
+
+**Test**: Run python check_solution.py (SCORE > 85 and PASS - next challenge)
